@@ -28,7 +28,7 @@ with open('data/p1_data.pkl', 'rb') as file:
 #     a: Acceleration of the vehicle, in the inertial frame
 #     v: Velocity of the vehicle, in the inertial frame
 #     p: Position of the vehicle, in the inertial frame
-#     alpha: Rotational acceleration of the vehicle, in the inertial frame
+#     alpha: Rotational acceleration of the vehicle, in the inertial framez
 #     w: Rotational velocity of the vehicle, in the inertial frame
 #     r: Rotational position of the vehicle, in Euler (XYZ) angles in the inertial frame
 #     _t: Timestamp in ms.
@@ -141,13 +141,30 @@ lidar_i = 0
 # a function for it.
 ################################################################################################
 def measurement_update(sensor_var, p_cov_check, y_k, p_check, v_check, q_check):
+    
     # 3.1 Compute Kalman Gain
+    H = np.zeros([3, 9])
+    H[:3, :3] = np.identity(3)  # [3, 9]
+    if sensor_var == "gnss":
+        R = np.identity(3) * var_gnss    # [3, 3]
+    elif sensor_var == "lidar":
+        R = np.identity(3) * var_lidar   # [3, 3]
+    K = p_cov_check @ H.T @ np.linalg.inv(H @ p_cov_check @ H.T + R) # [9, 3]
 
     # 3.2 Compute error state
+    delta_x = K @ (y_k - p_check[:3]) # [9] 
 
     # 3.3 Correct predicted state
+    delta_p = delta_x[0:3] # [3]
+    delta_v = delta_x[3:6] # [3]
+    delta_phi = delta_x[6:9] # [3]
+
+    p_check = p_check + delta_p
+    v_check = v_check + delta_v
+    q_check = Quaternion(axis_angle=delta_phi).quat_mult(q_check)
 
     # 3.4 Compute corrected covariance
+    p_cov_check = (1 - K @ H) @ p_cov_check  # [9, 9]
 
     return p_check, v_check, q_check, p_cov_check
 
@@ -158,16 +175,59 @@ def measurement_update(sensor_var, p_cov_check, y_k, p_check, v_check, q_check):
 # Now that everything is set up, we can start taking in the sensor data and creating estimates
 # for our state in a loop.
 ################################################################################################
+
 for k in range(1, imu_f.data.shape[0]):  # start at 1 b/c we have initial prediction from gt
+    
     delta_t = imu_f.t[k] - imu_f.t[k - 1]
 
-    # 1. Update state with IMU inputs
+    p_last = p_est[k - 1]
+    v_last = v_est[k - 1]
+    q_last = q_est[k - 1]
+    f_last = imu_f.data[k - 1]
+    w_last = imu_w.data[k - 1]
 
+    p_cov_last = p_cov[k - 1]
+    
+
+    # 1. Update state with IMU inputs
+    
+    Cns = Quaternion(*q_last).to_mat()
+    
     # 1.1 Linearize Motion Model
+    p_predict = p_last + delta_t * v_last + delta_t ** 2 / 2 * (Cns @ f_last - g)
+    v_predict = v_last + delta_t * (Cns @ f_last - g)
+    q_predict = Quaternion(axis_angle=w_last * delta_t).quat_mult(q_last)
 
     # 2. Propagate uncertainty
+    
+    F_last = np.identity(9)
+    F_last[:3, 3:6] = np.identity(3) * delta_t
+    F_last[3:6, -3:] = - skew_symmetric(Cns @ f_last) * delta_t
+
+    Q_last = np.identity(6)
+    Q_last[:, :3] *= delta_t**2 * var_imu_f
+    Q_last[:, -3:] *= delta_t**2 * var_imu_w  # !!! f, w location
+
+    p_cov_predict =  F_last @ p_cov_last @ F_last.T + l_jac @ Q_last @ l_jac.T
 
     # 3. Check availability of GNSS and LIDAR measurements
+    curr_t = imu_f.t[k]
+
+    ## lidar
+    # if len(np.where(lidar.t == curr_t)[0]) == 1:
+    #     idx = np.where(lidar.t== curr_t)[0][0]
+    #     p_predict, v_predict, q_predict, p_cov_predict = measurement_update("lidar", p_cov_predict, lidar.data[idx], p_predict, v_predict, q_predict)
+
+    ## gnss 
+    # if len(np.where(gnss.t == curr_t)[0]) == 1:
+    #     idx = np.where(gnss.t == curr_t)[0][0]
+    #     p_predict, v_predict, q_predict, p_cov_predict = measurement_update("gnss", p_cov_predict, gnss.data[idx], p_predict, v_predict, q_predict)
+
+    # 4. Update list values
+    p_est[k] = p_predict
+    v_est[k] = v_predict
+    q_est[k] = q_predict
+    p_cov[k] = p_cov_predict
 
 
 #### 6. Results and Analysis ###################################################################
