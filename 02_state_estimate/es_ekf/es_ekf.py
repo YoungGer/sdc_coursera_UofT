@@ -204,6 +204,7 @@ for k in range(1, imu_f.data.shape[0]):  # start at 1 b/c we have initial predic
     F_last[:3, 3:6] = np.identity(3) * delta_t
     F_last[3:6, -3:] = - skew_symmetric(Cns @ f_last) * delta_t
 
+
     Q_last = np.identity(6)
     Q_last[:, :3] *= delta_t**2 * var_imu_f
     Q_last[:, -3:] *= delta_t**2 * var_imu_w  # !!! f, w location
@@ -213,15 +214,15 @@ for k in range(1, imu_f.data.shape[0]):  # start at 1 b/c we have initial predic
     # 3. Check availability of GNSS and LIDAR measurements
     curr_t = imu_f.t[k]
 
-    ## lidar
-    # if len(np.where(lidar.t == curr_t)[0]) == 1:
-    #     idx = np.where(lidar.t== curr_t)[0][0]
-    #     p_predict, v_predict, q_predict, p_cov_predict = measurement_update("lidar", p_cov_predict, lidar.data[idx], p_predict, v_predict, q_predict)
+    # lidar
+    if len(np.where(lidar.t == curr_t)[0]) == 1:
+        idx = np.where(lidar.t== curr_t)[0][0]
+        p_predict, v_predict, q_predict, p_cov_predict = measurement_update("lidar", p_cov_predict, lidar.data[idx], p_predict, v_predict, q_predict)
 
-    ## gnss 
-    # if len(np.where(gnss.t == curr_t)[0]) == 1:
-    #     idx = np.where(gnss.t == curr_t)[0][0]
-    #     p_predict, v_predict, q_predict, p_cov_predict = measurement_update("gnss", p_cov_predict, gnss.data[idx], p_predict, v_predict, q_predict)
+    # gnss 
+    if len(np.where(gnss.t == curr_t)[0]) == 1:
+        idx = np.where(gnss.t == curr_t)[0][0]
+        p_predict, v_predict, q_predict, p_cov_predict = measurement_update("gnss", p_cov_predict, gnss.data[idx], p_predict, v_predict, q_predict)
 
     # 4. Update list values
     p_est[k] = p_predict
