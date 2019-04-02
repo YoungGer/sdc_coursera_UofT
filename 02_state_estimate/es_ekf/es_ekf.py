@@ -18,7 +18,7 @@ sys.path.append('./data')
 # This is where you will load the data from the pickle files. For parts 1 and 2, you will use
 # p1_data.pkl. For part 3, you will use p3_data.pkl.
 ################################################################################################
-with open('data/p1_data.pkl', 'rb') as file:
+with open('data/p3_data.pkl', 'rb') as file:
     data = pickle.load(file)
 
 ################################################################################################
@@ -102,7 +102,7 @@ lidar.data = (C_li @ lidar.data.T).T + t_li_i
 ################################################################################################
 var_imu_f = 0.1
 var_imu_w = 1.0
-var_gnss = 0.01
+var_gnss = 10 # init 0.01; 
 var_lidar = 0.25
 
 ################################################################################################
@@ -164,7 +164,8 @@ def measurement_update(sensor_var, p_cov_check, y_k, p_check, v_check, q_check):
     q_check = Quaternion(axis_angle=delta_phi).quat_mult(q_check)
 
     # 3.4 Compute corrected covariance
-    p_cov_check = (1 - K @ H) @ p_cov_check  # [9, 9]
+
+    p_cov_check = (np.identity(9) - K @ H) @ p_cov_check  # [9, 9]
 
     return p_check, v_check, q_check, p_cov_check
 
@@ -206,8 +207,8 @@ for k in range(1, imu_f.data.shape[0]):  # start at 1 b/c we have initial predic
 
 
     Q_last = np.identity(6)
-    Q_last[:, :3] *= delta_t**2 * var_imu_f
-    Q_last[:, -3:] *= delta_t**2 * var_imu_w  # !!! f, w location
+    Q_last[:3, :3] *= delta_t**2 * var_imu_f
+    Q_last[-3:, -3:] *= delta_t**2 * var_imu_w  # !!! f, w location
 
     p_cov_predict =  F_last @ p_cov_last @ F_last.T + l_jac @ Q_last @ l_jac.T
 
@@ -215,9 +216,9 @@ for k in range(1, imu_f.data.shape[0]):  # start at 1 b/c we have initial predic
     curr_t = imu_f.t[k]
 
     # lidar
-    if len(np.where(lidar.t == curr_t)[0]) == 1:
-        idx = np.where(lidar.t== curr_t)[0][0]
-        p_predict, v_predict, q_predict, p_cov_predict = measurement_update("lidar", p_cov_predict, lidar.data[idx], p_predict, v_predict, q_predict)
+    # if len(np.where(lidar.t == curr_t)[0]) == 1:
+    #     idx = np.where(lidar.t== curr_t)[0][0]
+    #     p_predict, v_predict, q_predict, p_cov_predict = measurement_update("lidar", p_cov_predict, lidar.data[idx], p_predict, v_predict, q_predict)
 
     # gnss 
     if len(np.where(gnss.t == curr_t)[0]) == 1:
@@ -293,13 +294,13 @@ plt.show()
 ################################################################################################
 
 # Pt. 1 submission
-p1_indices = [9000, 9400, 9800, 10200, 10600]
-p1_str = ''
-for val in p1_indices:
-    for i in range(3):
-        p1_str += '%.3f ' % (p_est[val, i])
-with open('pt1_submission.txt', 'w') as file:
-    file.write(p1_str)
+# p1_indices = [9000, 9400, 9800, 10200, 10600]
+# p1_str = ''
+# for val in p1_indices:
+#     for i in range(3):
+#         p1_str += '%.3f ' % (p_est[val, i])
+# with open('pt1_submission.txt', 'w') as file:
+#     file.write(p1_str)
 
 # Pt. 2 submission
 # p2_indices = [9000, 9400, 9800, 10200, 10600]
@@ -311,10 +312,10 @@ with open('pt1_submission.txt', 'w') as file:
 #     file.write(p2_str)
 
 # Pt. 3 submission
-# p3_indices = [6800, 7600, 8400, 9200, 10000]
-# p3_str = ''
-# for val in p3_indices:
-#     for i in range(3):
-#         p3_str += '%.3f ' % (p_est[val, i])
-# with open('pt3_submission.txt', 'w') as file:
-#     file.write(p3_str)
+p3_indices = [6800, 7600, 8400, 9200, 10000]
+p3_str = ''
+for val in p3_indices:
+    for i in range(3):
+        p3_str += '%.3f ' % (p_est[val, i])
+with open('pt3_submission.txt', 'w') as file:
+    file.write(p3_str)
