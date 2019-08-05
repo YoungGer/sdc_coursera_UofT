@@ -1,2 +1,6 @@
 *.pyc
+*.ipynb*
+*.zip
+*.tar.gz
+*.txt
 CarlaSimulator
