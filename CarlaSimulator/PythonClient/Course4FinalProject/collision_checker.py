@@ -187,7 +187,7 @@ class CollisionChecker:
                             # --------------------------------------------------
                             collision_x = paths[j][0][-1]
                             collision_y = paths[j][1][-1]
-                            score += self._weight * np.sqrt((curr_x - collision_x)**2 + (curr_y - collision_y)**2)
+                            score += self._weight / np.sqrt((curr_x - collision_x)**2 + (curr_y - collision_y)**2)
                             # --------------------------------------------------
 
                             pass
