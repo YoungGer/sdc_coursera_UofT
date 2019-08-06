@@ -82,8 +82,11 @@ class CollisionChecker:
 
                 # TODO: INSERT YOUR CODE BETWEEN THE DASHED LINES
                 # --------------------------------------------------------------
-                # circle_locations[:, 0] = ... 
-                # circle_locations[:, 1] = ...
+                curr_x = path[0][j]
+                curr_y = path[1][j]
+                curr_t = path[2][j]
+                circle_locations[:, 0] =  curr_x + self._circle_offsets * np.cos(curr_t)
+                circle_locations[:, 1] =  curr_y + self._circle_offsets * np.sin(curr_t)
                 # --------------------------------------------------------------
 
                 # Assumes each obstacle is approximated by a collection of
@@ -164,7 +167,12 @@ class CollisionChecker:
                 # A lower score implies a more suitable path.
                 # TODO: INSERT YOUR CODE BETWEEN THE DASHED LINES
                 # --------------------------------------------------------------
-                # score = ...
+                curr_x = paths[i][0][-1]
+                curr_y = paths[i][1][-1]
+                curr_t = paths[i][2][-1]
+                goal_x = goal_state[0]
+                goal_y = goal_state[1]
+                score =  np.sqrt((curr_x - goal_x)**2 + (curr_y - goal_y)**2)
                 # --------------------------------------------------------------
 
                 # Compute the "proximity to other colliding paths" score and
@@ -177,7 +185,9 @@ class CollisionChecker:
                         if not collision_check_array[j]:
                             # TODO: INSERT YOUR CODE BETWEEN THE DASHED LINES
                             # --------------------------------------------------
-                            # score += self._weight * ...
+                            collision_x = paths[j][0][-1]
+                            collision_y = paths[j][1][-1]
+                            score += self._weight * np.sqrt((curr_x - collision_x)**2 + (curr_y - collision_y)**2)
                             # --------------------------------------------------
 
                             pass
