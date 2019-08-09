@@ -210,9 +210,15 @@ class LocalPlanner:
             path = self._path_optimizer.optimize_spiral(goal_state[0], 
                                                         goal_state[1], 
                                                         goal_state[2])
-            if np.linalg.norm([path[0][-1] - goal_state[0], 
-                               path[1][-1] - goal_state[1], 
-                               path[2][-1] - goal_state[2]]) > 0.1:
+            
+            path_x, path_y, path_t = path[0][-1], path[1][-1], path[2][-1]
+            goal_x, goal_y, goal_t = goal_state[0], goal_state[1], goal_state[2]
+            diff = np.linalg.norm([path_x - goal_x, path_y - goal_y, path_t - goal_t])
+            # print "goal: ", goal_x, goal_y, goal_t
+            # print "path: ", path_x, path_y, path_t
+            # print "path goal diff: ", diff
+            # print "----------"
+            if diff > 0.1:
                 path_validity.append(False)
             else:
                 paths.append(path)

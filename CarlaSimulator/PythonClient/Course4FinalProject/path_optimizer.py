@@ -113,7 +113,7 @@ class PathOptimizer:
         # TODO: INSERT YOUR CODE BETWEEN THE DASHED LINES
         # ------------------------------------------------------------------
         # Remember that a, b, c, d and s are lists
-        thetas = [a*s + b/2*x**2 + c/3*x**3 + d/4*x**4 for x in s]
+        thetas = [a*x + b/2*x**2 + c/3*x**3 + d/4*x**4 for x in s]
         return thetas
         # ------------------------------------------------------------------
 
