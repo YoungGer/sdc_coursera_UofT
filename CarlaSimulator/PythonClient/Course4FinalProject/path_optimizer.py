@@ -113,7 +113,7 @@ class PathOptimizer:
         # TODO: INSERT YOUR CODE BETWEEN THE DASHED LINES
         # ------------------------------------------------------------------
         # Remember that a, b, c, d and s are lists
-        thetas = [a*s + b/2*s**2 + c/3*s**3 + d/4*s**4 for x in s]
+        thetas = [a*s + b/2*x**2 + c/3*x**3 + d/4*x**4 for x in s]
         return thetas
         # ------------------------------------------------------------------
 
@@ -169,8 +169,8 @@ class PathOptimizer:
         # TODO: INSERT YOUR CODE BETWEEN THE DASHED LINES
         # ------------------------------------------------------------------
         t_points = self.thetaf(a, b, c, d, s_points)
-        x_points = scipy.integrate.cumtrapz(np.cos(t_points), s_points, initial=0)
-        y_points = scipy.integrate.cumtrapz(np.sin(t_points), s_points, initial=0)
+        x_points = scipy.integrate.cumtrapz(np.cos(t_points), s_points, initial=0.0)
+        y_points = scipy.integrate.cumtrapz(np.sin(t_points), s_points, initial=0.0)
         return [x_points, y_points, t_points]
         # ------------------------------------------------------------------
 

@@ -157,8 +157,8 @@ class LocalPlanner:
             # and sin(goal_theta + pi/2), respectively.
             # TODO: INSERT YOUR CODE BETWEEN THE DASHED LINES
             # ------------------------------------------------------------------
-            x_offset = offset * cos(goal_theta + pi/2)
-            y_offset = offset * sin(goal_theta + pi/2)
+            x_offset = offset * cos(goal_t + pi/2)
+            y_offset = offset * sin(goal_t + pi/2)
             # ------------------------------------------------------------------
 
             goal_state_set.append([goal_x + x_offset, 

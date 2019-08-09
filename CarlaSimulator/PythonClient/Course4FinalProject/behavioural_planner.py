@@ -97,7 +97,7 @@ class BehaviouralPlanner:
             # First, find the closest index to the ego vehicle.
             # TODO: INSERT YOUR CODE BETWEEN THE DASHED LINES
             # ------------------------------------------------------------------
-            closest_len, closest_index = self.get_closest_index(waypoints, ego_state)
+            closest_len, closest_index = get_closest_index(waypoints, ego_state)
             # ------------------------------------------------------------------
 
             # Next, find the goal index that lies within the lookahead distance
@@ -111,9 +111,9 @@ class BehaviouralPlanner:
             # for stop signs, and compute the goal state accordingly.
             # TODO: INSERT YOUR CODE BETWEEN THE DASHED LINES
             # ------------------------------------------------------------------
-            goal_index, stop_sign_found = self.check_for_stop_signs(waypoints, closest_index, goal_index)
-            self._goal_index = goal_index
-            self._goal_state = waypoints[goal_index]
+            new_index, stop_sign_found = self.check_for_stop_signs(waypoints, closest_index, goal_index)
+            self._goal_index = new_index if stop_sign_found else goal_index
+            self._goal_state = waypoints[self._goal_index]
             # ------------------------------------------------------------------
 
             # If stop sign found, set the goal to zero speed, then transition to 
@@ -124,8 +124,6 @@ class BehaviouralPlanner:
                 self._goal_state[2] = 0
                 self._state = DECELERATE_TO_STOP
             # ------------------------------------------------------------------
-
-            pass
 
         # In this state, check if we have reached a complete stop. Use the
         # closed loop speed to do so, to ensure we are actually at a complete
@@ -138,8 +136,6 @@ class BehaviouralPlanner:
                 self._state = STAY_STOPPED
                 self._stop_count = 0
             # ------------------------------------------------------------------
-
-            pass
 
         # In this state, check to see if we have stayed stopped for at
         # least STOP_COUNTS number of cycles. If so, we can now leave
@@ -162,7 +158,7 @@ class BehaviouralPlanner:
                 # that is the lookahead distance away.
                 # TODO: INSERT YOUR CODE BETWEEN THE DASHED LINES
                 # --------------------------------------------------------------
-                stop_sign_found = False
+                _, stop_sign_found = self.check_for_stop_signs(waypoints, closest_index, goal_index)
                 self._goal_index = goal_index
                 self._goal_state = waypoints[goal_index]
                 # --------------------------------------------------------------
@@ -174,7 +170,6 @@ class BehaviouralPlanner:
                 if not stop_sign_found:
                     self._state = FOLLOW_LANE
                 # --------------------------------------------------------------
-                pass
 
             # Otherwise, continue counting.
             else:
@@ -182,8 +177,6 @@ class BehaviouralPlanner:
                 # --------------------------------------------------------------
                 self._stop_count += 1
                 # --------------------------------------------------------------
-
-                pass
         else:
             raise ValueError('Invalid state value.')
 
