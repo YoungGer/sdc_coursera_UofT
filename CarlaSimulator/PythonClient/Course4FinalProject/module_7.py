@@ -86,7 +86,7 @@ DIST_THRESHOLD_TO_LAST_WAYPOINT = 2.0  # some distance from last position before
 
 # Planning Constants
 NUM_PATHS = 7
-BP_LOOKAHEAD_BASE      = 8.0              # m
+BP_LOOKAHEAD_BASE      = 7.0              # m
 BP_LOOKAHEAD_TIME      = 2.0              # s
 PATH_OFFSET            = 1.5              # m
 CIRCLE_OFFSETS         = [-1.0, 1.0, 3.0] # m
@@ -736,6 +736,7 @@ def exec_waypoint_nav_demo(args):
                 bp.transition_state(waypoints, ego_state, current_speed)
 
                 print("state: ", bp._state)
+                print("ego_state: ", ego_state)
 
                 #  # Check to see if we need to follow the lead vehicle.
                 bp.check_for_lead_vehicle(ego_state, lead_car_pos[1])
