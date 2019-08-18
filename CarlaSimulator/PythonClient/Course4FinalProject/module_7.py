@@ -735,6 +735,8 @@ def exec_waypoint_nav_demo(args):
                 #  # Perform a state transition in the behavioural planner.
                 bp.transition_state(waypoints, ego_state, current_speed)
 
+                print("state: ", bp._state)
+
                 #  # Check to see if we need to follow the lead vehicle.
                 bp.check_for_lead_vehicle(ego_state, lead_car_pos[1])
 
@@ -744,9 +746,9 @@ def exec_waypoint_nav_demo(args):
                 #  # Calculate planned paths in the local frame.
                 paths, path_validity = lp.plan_paths(goal_state_set)
 
-                print("goal_state_set length: ", len(goal_state_set))
-                print(goal_state_set)
-                print("path length: ", len(paths))
+                # print("goal_state_set length: ", len(goal_state_set))
+                # print(goal_state_set)
+                # print("path length: ", len(paths))
 
                 #  # Transform those paths back to the global frame.
                 paths = local_planner.transform_paths(paths, ego_state)
